@@ -1,1 +1,2 @@
-# tp-js-nikita
+Partie 1 du projet initialisee sur git: j'ai complete les questions et commence les bases du js en declarant mes constantes.
+Partie 2 projet majoritairement initialisee il me reste des details et le donut.
