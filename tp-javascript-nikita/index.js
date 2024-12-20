@@ -2,53 +2,69 @@ document.addEventListener('DOMContentLoaded', () => {
     const previousBtnElement = document.querySelector('#previous-btn')
     const nextBtnElement = document.querySelector('#next-btn')
     const questionPage = document.querySelectorAll('.nav-link')
+    const selectAllRadioBtn = document.querySelectorAll('input[type=radio]');
+    let progressBarValue = 0
     let correctResponse = 0
     let page = 0
-
+ 
         //declaration des buttons comme dissabled pour le debut de formulaire 
     previousBtnElement.disabled = true
     nextBtnElement.disabled = true
 
+        // button radio if checked then true
+        selectAllRadioBtn.forEach(radioBtnElement => {
+            radioBtnElement.addEventListener('click', () => {
+                nextBtnElement.removeAttribute('disabled');
+                radioBtnElement.setAttribute('checked', 'true');
+            });
+        });
+        // button radio if checked then true
+
         // previous btn event happens start
         previousBtnElement.addEventListener('click', () => {
-            if (page !== 0) {
-                previousPage(questionPage, page)
-                page--
-            } else {
-                previousBtnElement.disabled = true
+            if (nextBtnElement.hasAttribute('disabled')) {
+                nextBtnElement.removeAttribute('disabled');
             }
-        })
+    
+            if (page !== 0) {
+                progressBarValue -= 10;
+                previousPage(questionPage, page, progressBarValue);
+                page--;
+            }
+    
+            if (page === 0) {
+                previousBtnElement.setAttribute('disabled', 'true');
+            }
+        });
         // previous btn event happens end
     
         // next btn event happens start
         nextBtnElement.addEventListener('click', () => {
-            if (page !== 10) {
-                nextPage(questionPage, page)
-                page++
+            if (previousBtnElement.hasAttribute('disabled')) {
+                previousBtnElement.removeAttribute('disabled');
             }
-            console.log(correctResponse);
-        })                                                                                                                                                                                                                                                                                       
+    
+            if (page < 10) {
+                progressBarValue += 10;
+                nextPage(questionPage, page, progressBarValue);
+                page++;
+            }
+
+        });                                                                                                                                                                                                                                                                                    
         // next btn event happens end
 
         // Grade numbering function start
         const radioBtnCorrectElement = document.querySelectorAll(
-            'input[type=radio][value="correct"][checked]'
+            'input[type=radio][value="correct"].checked'
         )
+        
         radioBtnCorrectElement.forEach( x => {
             correctResponse++ 
         })
+        const radioBtnIncorrectElement = 10 - radioBtnCorrectElement
         // Grade numbering function end
 
-        //activate the next button after a radio click
-        const questionSelectRadioBtnElements = document.querySelectorAll(
-            'input[type=radio]'
-        )
-        questionSelectRadioBtnElements.forEach(questionSelectRadioBtnElements => {
-            questionSelectRadioBtnElements.addEventListener('click', () => {
-                nextBtnElement.disabled = false
-            })
-        })
-        //activate the next button after a radio click end
+       
 
 
 
@@ -57,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-
+        
 // DECLARE CONSTANTS FOR FURTHER USE
     // updater le progress bar pour chaque question start
     const updateProgressBar = (value) => {
