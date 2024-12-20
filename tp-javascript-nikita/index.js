@@ -1,10 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Cours utilises: LesModules, inscription.js, donut.js ou le SortByCovid.js.
     const previousBtnElement = document.querySelector('#previous-btn')
     const nextBtnElement = document.querySelector('#next-btn')
     const questionPage = document.querySelectorAll('.nav-link')
     const selectAllRadioBtn = document.querySelectorAll('input[type=radio]');
     let progressBarValue = 0
-    let correctResponse = 0
     let page = 0
  
         //declaration des buttons comme dissabled pour le debut de formulaire 
@@ -22,60 +22,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // previous btn event happens start
         previousBtnElement.addEventListener('click', () => {
-            if (nextBtnElement.hasAttribute('disabled')) {
-                nextBtnElement.removeAttribute('disabled');
-            }
-    
-            if (page !== 0) {
-                progressBarValue -= 10;
-                previousPage(questionPage, page, progressBarValue);
+            if (page > 0) {
                 page--;
-            }
+                progressBarValue -= 10;
+                updateProgressBar(progressBarValue);
+                switchPage(questionPage, page);
     
-            if (page === 0) {
-                previousBtnElement.setAttribute('disabled', 'true');
+                nextBtnElement.disabled = false;
+                if (page === 0) {
+                    previousBtnElement.disabled = true;
+                }
             }
         });
         // previous btn event happens end
     
         // next btn event happens start
         nextBtnElement.addEventListener('click', () => {
-            if (previousBtnElement.hasAttribute('disabled')) {
-                previousBtnElement.removeAttribute('disabled');
-            }
-    
-            if (page < 10) {
-                progressBarValue += 10;
-                nextPage(questionPage, page, progressBarValue);
+            if (page < questionPage.length - 1) {
                 page++;
+                progressBarValue += 10;
+                updateProgressBar(progressBarValue);
+                switchPage(questionPage, page);
+    
+                previousBtnElement.disabled = false;
+                nextBtnElement.disabled = true;
+    
+                if (page === questionPage.length - 1) {
+                    calculateResults();
+                    renderResultsChart();
+                    hideBtns();
+                }
             }
-
-        });                                                                                                                                                                                                                                                                                    
+        });                                                                                                                                                                                                                                                                                  
         // next btn event happens end
-
-        // Grade numbering function start
-        const radioBtnCorrectElement = document.querySelectorAll(
-            'input[type=radio][value="correct"].checked'
-        )
-        
-        radioBtnCorrectElement.forEach( x => {
-            correctResponse++ 
-        })
-        const radioBtnIncorrectElement = 10 - radioBtnCorrectElement
-        // Grade numbering function end
 
        
 
 
 
-
-
-
-
-
-        
-// DECLARE CONSTANTS FOR FURTHER USE
-    // updater le progress bar pour chaque question start
+// !!DECLARE CONSTANTS FOR FURTHER USE!!
+    // update the progress bar forEach question start
     const updateProgressBar = (value) => {
         const progressElement = document.querySelector('#progress')
         const progressBarElement = progressElement.querySelector('.progress-bar')
@@ -86,26 +72,62 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     // updater le progress bar pour chaque question end
 
-    // simulate the functionality of the previous button -> previous page start
-    const previousPage = (questionPage, page) => {
-        const previousTab = questionPage[page - 1]
-        previousTab.removeAttribute('disabled')
-        previousTab.click()
+    //  navigation in the form start
+    const switchPage = (tabs, index) => {
+        tabs.forEach((tab, i) => {
+            tab.setAttribute('disabled', 'true');
+            if (i === index) {
+                tab.removeAttribute('disabled');
+                tab.click();
+            }
+        });
+    };
+    //  navigation in the form end
 
-        questionPage[page].setAttribute('disabled', 'true')
-    }
-    // simulate the functionality of the previous button -> previous page end
+    // hide buttons start
+    const hideBtns = () => {
+        previousBtnElement.style.display = 'none';
+        nextBtnElement.style.display = 'none';
+    };
+    // hide buttons end
 
-    // simulate the functionality of the next button -> next page start
-    const nextPage = (questionPage, page) => {
-        const nextTab = questionPage[page + 1]
-        nextTab.removeAttribute('disabled')
-        nextTab.click()
-        nextBtnElement.disabled = true
+    // calculate correct answers start
+    const calculateResults = () => {
+        let correctAnswers = 0;
+        const correctRadios = document.querySelectorAll('input[type=radio][value="correct"]');
 
+        correctRadios.forEach(radio => {
+            if (radio.checked) {
+                correctAnswers++;
+            }
+        });
+    
 
-        questionPage[page].setAttribute('disabled', 'true')
-    }
-    // simulate the functionality of the next button -> next page end
+        return {
+            correct: correctAnswers,
+            incorrect: questionPage.length - 1 - correctAnswers
+        };
+    };
+    // calculate correct answers end
+
+    // donut start
+    const renderResultsChart = () => {
+        const results = calculateResults();
+
+        new Chart(document.getElementById('my-chart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Correct', 'Incorrect'],
+                datasets: [{
+                    data: [results.correct, results.incorrect],
+                    backgroundColor: ['cyan', 'pink'],
+                    hoverOffset: 4,
+                    borderWidth: 1
+                }]
+            }
+        });
+    };
+    // donut end
+
 // END
 })
